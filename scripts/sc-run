@@ -1,0 +1,23 @@
+#!/usr/bin/env python3
+import argparse
+import os
+from pathlib import Path
+
+from core import run_pipeline
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Science Catalogs pipeline runner")
+    parser.add_argument("config_path", help="caminho do config.yaml")
+    parser.add_argument("cwd", nargs="?", default=os.getcwd(), help="diretório de processamento")
+    args = parser.parse_args()
+
+    config_path = args.config_path
+    cwd = args.cwd
+    Path(cwd).mkdir(parents=True, exist_ok=True)
+
+    run_pipeline(config_path, cwd)
+
+
+if __name__ == "__main__":
+    main()

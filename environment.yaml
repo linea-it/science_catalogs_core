@@ -6,14 +6,16 @@ dependencies:
   - numpy
   - pandas
   - pyyaml
-  - dask==2025.7.0
-  - distributed==2025.7.0
+  - dask==2025.3.0
+  - distributed==2025.3.0
   - dask-jobqueue==0.9.0
   - astropy
   - dustmaps
   - tables-io==1.0.0
+  - bokeh=3.4
+  - jinja2=3.1
   - h5py
   - cdshealpix==0.7.2
-  - pip
-  - pip:
-      - hats-import
+  - lsdb=0.7.3
+  - hats=0.7.3
+  - hats-import=0.7.3

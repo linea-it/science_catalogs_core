@@ -8,8 +8,13 @@ from core import run_pipeline
 
 def main():
     parser = argparse.ArgumentParser(description="Science Catalogs pipeline runner")
-    parser.add_argument("config_path", help="caminho do config.yaml")
-    parser.add_argument("cwd", nargs="?", default=os.getcwd(), help="diretório de processamento")
+    parser.add_argument("config_path", help="path to config.yaml")
+    parser.add_argument(
+        "cwd",
+        nargs="?",
+        default=os.getcwd(),
+        help="processing directory (default: current working directory)",
+    )
     args = parser.parse_args()
 
     config_path = args.config_path

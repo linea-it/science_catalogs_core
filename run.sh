@@ -29,7 +29,7 @@ mkdir -p "$RUN_DIR"
 
 PIPE_BASE="$(cd "$(dirname "$0")" && pwd)"
 
-log "Garantindo ambiente instalado..."
+log "Ensuring the installed environment..."
 bash "${PIPE_BASE}/install.sh"
 
 LOGS_DIR="$RUN_DIR/process_info"
@@ -38,7 +38,7 @@ LOG_FILE="$LOGS_DIR/process.log"
 
 exec > >(tee -a "$LOG_FILE") 2>&1
 
-log "Executando pipeline..."
+log "Running pipeline..."
 
 "$MICROMAMBA_BIN" run --root-prefix "$MAMBA_ROOT_PREFIX" -n "$ENV_NAME" bash -c "
   export PATH=${PIPE_BASE}/scripts:\$PATH

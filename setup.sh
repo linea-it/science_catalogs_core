@@ -8,9 +8,9 @@ fi
 
 echo "APP_DIR=$APP_DIR"
 echo "DATASETS_DIR=$DATASETS_DIR"
-read -p "Enter 'yes' para confirmar a geração de config.yaml/env.sh com esses caminhos: " resp
+read -p "Enter 'yes' to generate config.yaml/env.sh with these paths: " resp
 if [ "$resp" != "yes" ]; then
-  echo "Abortado. Ajuste DATASETS_DIR e rode novamente."
+  echo "Aborted. Adjust DATASETS_DIR and rerun."
   exit 1
 fi
 
@@ -18,11 +18,11 @@ fi
 sed "s|<DATASETS_DIR>|$DATASETS_DIR|g; s|<APP_DIR>|$APP_DIR|g" \
   "$APP_DIR/config.template.yaml" > "$APP_DIR/config.yaml"
 
-echo "config.yaml gerado."
+echo "config.yaml generated."
 
 # Gera env.sh
 sed "s|<APP_DIR>|$APP_DIR|g; s|<DATASETS_DIR>|$DATASETS_DIR|g" \
   "$APP_DIR/env.template.sh" > "$APP_DIR/env.sh"
 chmod +x "$APP_DIR/env.sh"
 
-echo "env.sh gerado."
+echo "env.sh generated."

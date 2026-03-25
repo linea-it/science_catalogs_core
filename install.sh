@@ -16,12 +16,12 @@ log() {
 }
 
 if ! command -v "$MICROMAMBA_BIN" >/dev/null 2>&1; then
-  echo "❌ micromamba não encontrado no PATH"
+  echo "❌ micromamba not found in PATH"
   exit 1
 fi
 
 if [ ! -f "$ENV_FILE" ]; then
-  echo "❌ ${ENV_FILE} não encontrado"
+  echo "❌ ${ENV_FILE} not found"
   exit 1
 fi
 
@@ -35,24 +35,24 @@ env_exists() {
 }
 
 if env_exists; then
-  log "Ambiente '${ENV_NAME}' já existe."
+  log "Environment '${ENV_NAME}' already exists."
   if [ -f "$HASH_FILE" ]; then
     EXISTING_HASH=$(cat "$HASH_FILE")
     if [ "$EXISTING_HASH" = "$ENV_HASH" ]; then
-      log "✅ Ambiente está atualizado."
+      log "✅ Environment is up to date."
       exit 0
     else
-      log "⚠️ environment.yaml mudou. Recriando ambiente..."
+      log "⚠️ environment.yaml changed. Recreating environment..."
       "$MICROMAMBA_BIN" env remove --root-prefix "$MAMBA_ROOT_PREFIX" -n "$ENV_NAME" -y
     fi
   else
-    log "⚠️ Hash do ambiente não encontrado. Recriando..."
+    log "⚠️ Environment hash not found. Recreating..."
     "$MICROMAMBA_BIN" env remove --root-prefix "$MAMBA_ROOT_PREFIX" -n "$ENV_NAME" -y
   fi
 fi
 
-log "📦 Criando ambiente '${ENV_NAME}'..."
+log "📦 Creating environment '${ENV_NAME}'..."
 "$MICROMAMBA_BIN" create --root-prefix "$MAMBA_ROOT_PREFIX" -y -n "$ENV_NAME" -f "$ENV_FILE"
 echo "$ENV_HASH" > "$HASH_FILE"
 
-log "✅ Ambiente instalado."
+log "✅ Environment ready."

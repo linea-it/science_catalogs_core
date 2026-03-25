@@ -121,4 +121,4 @@ collection:
 
 # ---------------- Logs ----------------
 logs:
-  save_dask_performance: true
+  save_dask_performance: false

@@ -92,7 +92,7 @@ invalid_handling:
   round_err_decimal_cases: 5
 
 collection:
-  build: false
+  build: true
   margin_threshold: 10.0
 
 logs:

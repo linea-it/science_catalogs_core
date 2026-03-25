@@ -6,14 +6,7 @@ from dask_jobqueue import SLURMCluster
 
 
 def get_executor(executor_cfg: dict[str, Any]):
-    """Cria cluster Dask local ou Slurm a partir do bloco `cluster` do YAML.
-
-    executor_cfg deve ter as chaves:
-      - executor: "local" | "slurm"
-      - local: {n_workers, threads_per_worker, memory_limit}
-      - slurm: {interface, queue, cores, processes, memory, walltime, account,
-                save_jobs_info, dask_scale_number, job_extra_directives, extra_dask_configs, dask_config}
-    """
+    """Create a Dask cluster (local or Slurm) from the `cluster` YAML block."""
 
     logger = logging.getLogger(__name__)
     name = executor_cfg.get("executor", "local")
@@ -27,9 +20,7 @@ def get_executor(executor_cfg: dict[str, Any]):
     if name == "slurm":
         args = executor_cfg.get("slurm", {})
         job_extra_directives = args.get("job_extra_directives", []) or []
-        if args.get("save_jobs_info"):
-            # caller deve ter ajustado os paths nos job_extra_directives
-            pass
+
         cluster = SLURMCluster(
             interface=args.get("interface"),
             queue=args.get("queue"),
@@ -43,4 +34,4 @@ def get_executor(executor_cfg: dict[str, Any]):
         cluster.scale(jobs=scale)
         return cluster
 
-    raise ValueError(f"Executor '{name}' não suportado")
+    raise ValueError(f"Executor '{name}' not supported")

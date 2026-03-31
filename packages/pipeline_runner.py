@@ -59,7 +59,7 @@ def run_pipeline(config_path: str, cwd: str):
     run_path = Path(cwd)
     data_dir = run_path / "data"
     logs_dir = run_path / "logs"
-    dask_logs_dir = run_path / "dask_logs"
+    dask_logs_dir = run_path / "process_info" / "dask_logs"
     data_dir.mkdir(parents=True, exist_ok=True)
     logs_dir.mkdir(parents=True, exist_ok=True)
     dask_logs_dir.mkdir(parents=True, exist_ok=True)

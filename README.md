@@ -1,6 +1,6 @@
 ## Science Catalogs Pipeline
 
-Creates reproducible photometric “science catalogs” with Dask, Astropy, Dustmaps and HATS. Layout mirrors the TSM pipeline CLI, but validation steps are not included.
+Creates photometric “science catalogs” with Dask.
 
 Requirements
 - micromamba available in PATH (to create the `pipe_sc` env)

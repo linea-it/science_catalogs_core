@@ -1,4 +1,4 @@
-Title: Science Catalogs Pipeline
+## Science Catalogs Pipeline
 
 Creates reproducible photometric “science catalogs” with Dask, Astropy, Dustmaps and HATS. Layout mirrors the TSM pipeline CLI, but validation steps are not included.
 

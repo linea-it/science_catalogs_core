@@ -1,0 +1,124 @@
+##################################################################
+# Configuration template for the Science Catalogs Pipeline
+##################################################################
+
+# ---------------- Executor / Cluster ----------------
+cluster:
+  executor: "local"        # "local" or "slurm"
+  # Local config (used when executor == local)
+  local:
+    n_workers: 2
+    threads_per_worker: 2
+    memory_limit: "4GiB"
+  # Slurm config (used when executor == slurm)
+  slurm:
+    interface: "eno1"
+    queue: "cpu"
+    cores: 20
+    processes: 1
+    memory: "50GB"
+    walltime: "02:00:00"
+    account: "hpc-bpglsst"
+    save_jobs_info: false
+    dask_scale_number: 1
+    extra_dask_configs: false
+    dask_config: {}
+    job_extra_directives: []
+
+# ---------------- Inputs ----------------
+input:
+  # Where the input catalogs live
+  catalog_folder: "<DATASETS_DIR>/input"
+  catalog_pattern: "*.parquet"
+  # Columns to load; leave empty to load all
+  user_selected_cols: []
+  # Release identifier (affects reading/parsing)
+  which_release: "LSST_DP02"   # LSST_DP02 | LSST_DP1 | DES_Y6_GOLD_PARQUET | DES_DR2
+  is_id_in_index: false
+
+  # Optional boolean filtering
+  filter:
+    enabled: false
+    column: ""
+    value: 1
+    drop_column_after_filter: false
+
+  # Optional initial cut on a flux/mag column
+  initial_cut:
+    enabled: false
+    column: ""
+    column_type: "flux"      # flux | mag
+    mag_value: null
+    flux_value: null
+
+  # Input column patterns (use BAND as placeholder)
+  col_pattern: "FLUX_BAND"
+  err_pattern: "FLUXERR_BAND"
+  selected_bands: ["u", "g", "r", "i", "z", "y"]
+  ra_col: "ra"
+  dec_col: "dec"
+
+  # Input type and processing flags
+  input_col_type: "flux"          # flux | flux_dered | mag | mag_dered
+  input_col_model: null            # optional, becomes part of the suffix
+  compute_magnitude: true
+  compute_dereddening: true
+  keep_input_columns_when_computing_mag_or_dered: false
+
+# ---------------- Dustmaps ----------------
+dust:
+  use_dustmap: "sfd"             # sfd | bayestar | planck | ...
+  path_to_dustmaps: "<DATASETS_DIR>/dustmaps"
+  distance_col_pc: null           # column with distance (pc) for 3D maps
+  distance_fixed_pc: null         # fixed distance (pc) if no column
+
+# ---------------- Output ----------------
+output:
+  base_path: "<APP_DIR>"
+  save_as: "parquet"            # parquet | csv | hdf5
+  col_for_filename: null         # optional: column token in file names
+  order_by: []                   # optional: string or list
+  target_rows_per_part: null     # optional: target rows per partition
+  col_final_pattern: "mag_BAND"
+  err_final_pattern: "magerr_BAND"
+  band_case: "lower_case"       # lower_case | upper_case
+  mag_offset: 31.4
+  A_EBV:
+    u: 4.239
+    g: 3.303
+    r: 2.285
+    i: 1.698
+    z: 1.263
+    y: 1.088
+
+# ---------------- Invalid value handling ----------------
+invalid_handling:
+  replace_invalid_values: false
+  cross_invalidate: false
+  how_to_replace_col_values: "all"          # all | only_with_invalid_err
+  how_to_replace_err_values: "all"          # all | only_with_invalid_col
+  col_value_to_replace: null
+  err_value_to_replace: null
+  is_nan_and_inf_invalid_for_col: true
+  is_nan_and_inf_invalid_for_err: true
+  set_limit_for_col: false
+  limit_value_for_col: 999.0
+  limit_comparison_for_col: "greater_or_equal"  # greater_or_equal | less_or_equal
+  use_absolute_for_col_limits: true
+  set_limit_for_err: false
+  limit_value_for_err: 999.0
+  limit_comparison_for_err: "greater_or_equal"
+  use_absolute_for_err_limits: true
+  round_col: false
+  round_col_decimal_cases: 5
+  round_err: false
+  round_err_decimal_cases: 5
+
+# ---------------- HATS Collection (optional) ----------------
+collection:
+  build: false
+  margin_threshold: 10.0
+
+# ---------------- Logs ----------------
+logs:
+  save_dask_performance: false

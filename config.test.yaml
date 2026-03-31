@@ -1,0 +1,99 @@
+# Minimal config for local testing (dummy data in examples/input)
+
+cluster:
+  executor: "local"
+  local:
+    n_workers: 1
+    threads_per_worker: 1
+    memory_limit: "1GiB"
+  slurm:
+    interface: null
+    queue: null
+    cores: 1
+    processes: 1
+    memory: "1GB"
+    walltime: "00:30:00"
+    account: null
+    save_jobs_info: false
+    dask_scale_number: 1
+    extra_dask_configs: false
+    dask_config: {}
+    job_extra_directives: []
+
+input:
+  catalog_folder: "./examples/input"
+  catalog_pattern: "*.csv"
+  user_selected_cols: []
+  which_release: "LSST_DP02"
+  is_id_in_index: false
+  filter:
+    enabled: false
+    column: ""
+    value: null
+    drop_column_after_filter: false
+  initial_cut:
+    enabled: false
+    column: ""
+    column_type: "flux"
+    mag_value: null
+    flux_value: null
+  col_pattern: "FLUX_BAND"
+  err_pattern: "FLUXERR_BAND"
+  selected_bands: ["u", "g", "r"]
+  ra_col: "ra"
+  dec_col: "dec"
+  input_col_type: "flux"
+  input_col_model: null
+  compute_magnitude: true
+  compute_dereddening: false      # turn off to avoid needing real dustmaps
+  keep_input_columns_when_computing_mag_or_dered: false
+
+dust:
+  use_dustmap: "sfd"
+  path_to_dustmaps: "./examples/dustmaps"   # dummy path just for testing
+  distance_col_pc: null
+  distance_fixed_pc: null
+
+output:
+  base_path: "."
+  save_as: "csv"
+  col_for_filename: null
+  order_by: null
+  target_rows_per_part: null
+  col_final_pattern: "mag_BAND"
+  err_final_pattern: "magerr_BAND"
+  band_case: "lower_case"
+  mag_offset: 30.0
+  A_EBV:
+    u: 4.239
+    g: 3.303
+    r: 2.285
+
+invalid_handling:
+  replace_invalid_values: false
+  cross_invalidate: false
+  how_to_replace_col_values: "all"
+  how_to_replace_err_values: "all"
+  col_value_to_replace: null
+  err_value_to_replace: null
+  is_nan_and_inf_invalid_for_col: true
+  is_nan_and_inf_invalid_for_err: true
+  set_limit_for_col: false
+  limit_value_for_col: 999.0
+  limit_comparison_for_col: "greater_or_equal"
+  use_absolute_for_col_limits: true
+  set_limit_for_err: false
+  limit_value_for_err: 999.0
+  limit_comparison_for_err: "greater_or_equal"
+  use_absolute_for_err_limits: true
+  round_col: false
+  round_col_decimal_cases: 5
+  round_err: false
+  round_err_decimal_cases: 5
+
+collection:
+  build: true
+  margin_threshold: 10.0
+
+logs:
+  save_dask_performance: false

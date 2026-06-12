@@ -13,13 +13,9 @@ Creates/updates the micromamba env defined in `environment.yaml`.
 
 Configure
 ```
-cp config.template.yaml config.yaml      # generic template
+cp config.test.yaml config.yaml      # generic template
 # or
 cp config.des_dr2.yaml config.yaml       # DES DR2 example (from the notebook)
-```
-Optional: generate `config.yaml` and `env.sh` interactively with your paths:
-```
-./setup.sh
 ```
 
 Run

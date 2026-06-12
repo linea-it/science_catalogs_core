@@ -3,7 +3,7 @@ set -euo pipefail
 
 export APP_DIR=$(pwd)
 if [ -z "${DATASETS_DIR:-}" ]; then
-  export DATASETS_DIR="$APP_DIR/data-example"
+  export DATASETS_DIR="$APP_DIR/examples"
 fi
 
 echo "APP_DIR=$APP_DIR"

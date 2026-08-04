@@ -3,19 +3,18 @@ channels:
   - conda-forge
 dependencies:
   - python=3.12
-  - numpy
-  - pandas
+  - pytest
   - pyyaml
-  - dask==2025.3.0
-  - distributed==2025.3.0
+  - dask==2025.3.1
+  - distributed==2025.3.1
   - dask-jobqueue==0.9.0
-  - astropy
-  - dustmaps
-  - tables-io==1.0.0
+  - tables-io=1.1.0
   - bokeh=3.4
   - jinja2=3.1
-  - h5py
-  - cdshealpix==0.7.2
-  - lsdb=0.7.3
-  - hats=0.7.3
-  - hats-import=0.7.3
+  - cdshealpix=0.8.1
+  - lsdb=0.9.2
+  - hats=0.9.2
+  - hats-import=0.9.2
+  - pip
+  - pip:
+      - science-catalogs>=0.1.0b5

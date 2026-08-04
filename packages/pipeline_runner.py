@@ -1,20 +1,14 @@
 """Pipeline orchestration."""
 
+from copy import deepcopy
 import gc
-import glob
 from contextlib import nullcontext
 from pathlib import Path
 
-from dask import delayed
-from dask import dataframe as dd
 from dask.distributed import Client, performance_report, wait
+from science_catalogs import prepare_catalog, write_catalog
 
-from utils.collection import maybe_build_collection
-from utils.config import decide_suffix_and_flags
-from utils.dust import configure_dustmaps_path
 from executor import get_executor
-from utils.partitioning import reorder_and_rechunk
-from processing import process_file_df
 from utils.common import (
     copy_file,
     copy_directory,
@@ -23,11 +17,27 @@ from utils.common import (
     load_yml,
     setup_logger,
 )
-from utils.writers import write_partitions
+
+
+def _adapt_config_for_science_catalogs(cfg: dict) -> dict:
+    """Translate legacy app settings into the science_catalogs package schema."""
+    adapted = deepcopy(cfg)
+    output_cfg = adapted.setdefault("output", {})
+    collection_cfg = adapted.get("collection", {})
+
+    if collection_cfg.get("build") and output_cfg.get("save_as") != "hats":
+        source_format = output_cfg.get("save_as", "parquet")
+        output_cfg["hats_source_save_as"] = output_cfg.get("hats_source_save_as", source_format)
+        output_cfg["save_as"] = "hats"
+        if output_cfg.get("hats_margin_threshold") is None:
+            output_cfg["hats_margin_threshold"] = collection_cfg.get("margin_threshold")
+
+    return adapted
 
 
 def run_pipeline(config_path: str, cwd: str):
     cfg = load_yml(config_path) or {}
+    adapted_cfg = _adapt_config_for_science_catalogs(cfg)
 
     logdir = create_logdir(cwd)
     logger, logname = setup_logger(logdir=logdir)
@@ -43,19 +53,6 @@ def run_pipeline(config_path: str, cwd: str):
 
     add_info("log_file", str(Path(logdir.name, logname)))
 
-    inputs = cfg.get("input", {})
-    dust = cfg.get("dust", {})
-    output_cfg = cfg.get("output", {})
-    collection_cfg = cfg.get("collection", {})
-
-    configure_dustmaps_path(dust)
-
-    suffix, will_mag, will_dered_flux, will_dered_mag = decide_suffix_and_flags(
-        inputs,
-        inputs.get("compute_magnitude", True),
-        inputs.get("compute_dereddening", True),
-    )
-
     run_path = Path(cwd)
     data_dir = run_path / "data"
     logs_dir = run_path / "logs"
@@ -64,20 +61,7 @@ def run_pipeline(config_path: str, cwd: str):
     logs_dir.mkdir(parents=True, exist_ok=True)
     dask_logs_dir.mkdir(parents=True, exist_ok=True)
 
-    input_files = [
-        f
-        for f in glob.glob(
-            Path(inputs.get("catalog_folder", "")).expanduser().as_posix()
-            + "/"
-            + inputs.get("catalog_pattern", "*.parquet")
-        )
-    ]
-    if not input_files:
-        raise FileNotFoundError("No input files found for catalog_pattern")
-
-    logger.info("Total input files: %d", len(input_files))
-
-    cluster = get_executor(cfg.get("cluster", {}))
+    cluster = get_executor(adapted_cfg.get("cluster", {}))
     client = Client(cluster)
     cluster = client.cluster
     cluster_comm = getattr(cluster, "comm", None)
@@ -85,22 +69,11 @@ def run_pipeline(config_path: str, cwd: str):
         wait(cluster_comm)
     client.run(lambda: gc.collect())
 
-    delayed_dfs = [
-        delayed(process_file_df)(
-            p,
-            cfg_path=config_path,
-            will_mag=will_mag,
-            will_dered_flux=will_dered_flux,
-            will_dered_mag=will_dered_mag,
-        )
-        for p in input_files
-    ]
-    ddf = dd.from_delayed(delayed_dfs)
-
-    ddf_out = reorder_and_rechunk(ddf, output_cfg)
+    if cfg != adapted_cfg:
+        logger.info("Translated legacy collection.build settings into science_catalogs output config.")
 
     report_path = logs_dir / "dask-performance-report.html"
-    save_perf = cfg.get("logs", {}).get("save_dask_performance", True)
+    save_perf = adapted_cfg.get("logs", {}).get("save_dask_performance", True)
     if save_perf:
         try:
             ctx = performance_report(filename=str(report_path))
@@ -114,11 +87,16 @@ def run_pipeline(config_path: str, cwd: str):
 
     try:
         with ctx:
-            write_partitions(ddf_out, output_cfg, str(data_dir), suffix)
+            prepared = prepare_catalog(config_path, config=adapted_cfg, client=client)
+            written_paths = write_catalog(prepared, str(data_dir), client=client)
     except Exception as exc:  # pylint: disable=broad-except
         logger.warning("Performance report failed; rerunning without it: %s", exc)
         with nullcontext():
-            write_partitions(ddf_out, output_cfg, str(data_dir), suffix)
+            prepared = prepare_catalog(config_path, config=adapted_cfg, client=client)
+            written_paths = write_catalog(prepared, str(data_dir), client=client)
+
+    logger.info("Processed %d input files", len(prepared.input_files))
+    logger.info("Wrote %d output artifact(s)", len(written_paths))
 
     output_dir_entry = {
         "path": str(data_dir.relative_to(cwd)),
@@ -126,23 +104,6 @@ def run_pipeline(config_path: str, cwd: str):
     }
 
     add_info("outputs", [output_dir_entry])
-
-    try:
-        collection_report = maybe_build_collection(
-            collection_cfg,
-            str(data_dir),
-            str(run_path),
-            suffix,
-            output_cfg,
-            client,
-            inputs.get("ra_col"),
-            inputs.get("dec_col"),
-        )
-        logger.info("HATS collection report generated at: %s", collection_report)
-        if collection_report:
-            add_info("collection_report", str(collection_report.relative_to(cwd)))
-    except Exception as exc:  # pylint: disable=broad-except
-        logger.info("Failed to generate HATS collection: %s", exc)
 
     client.close()
     cluster.close()

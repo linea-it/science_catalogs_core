@@ -75,7 +75,10 @@ dust:
 # ---------------- Output ----------------
 output:
   base_path: "<APP_DIR>"
-  save_as: "parquet"            # parquet | csv | hdf5
+  save_as: "parquet"            # parquet | hats
+  hats_source_save_as: "parquet"  # only used when save_as == hats; parquet | csv
+  hats_artifact_name: null        # optional custom HATS collection name
+  hats_margin_threshold: null     # optional; falls back to collection.margin_threshold
   col_for_filename: null         # optional: column token in file names
   order_by: []                   # optional: string or list
   target_rows_per_part: null     # optional: target rows per partition
@@ -114,7 +117,9 @@ invalid_handling:
   round_err: false
   round_err_decimal_cases: 5
 
-# ---------------- HATS Collection (optional) ----------------
+# ---------------- HATS compatibility defaults ----------------
+# When collection.build is true, the app translates the legacy setting into
+# output.save_as: hats before calling the science_catalogs package.
 collection:
   build: false
   margin_threshold: 10.0

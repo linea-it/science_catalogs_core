@@ -56,7 +56,10 @@ dust:
 
 output:
   base_path: "."
-  save_as: "csv"
+  save_as: "parquet"
+  hats_source_save_as: "parquet"
+  hats_artifact_name: null
+  hats_margin_threshold: null
   col_for_filename: null
   order_by: null
   target_rows_per_part: null
@@ -92,7 +95,7 @@ invalid_handling:
   round_err_decimal_cases: 5
 
 collection:
-  build: true
+  build: false
   margin_threshold: 10.0
 
 logs:

@@ -79,6 +79,9 @@ class Dust(BaseModel):
 class Output(BaseModel):
     base_path: str = "."
     save_as: str = "parquet"
+    hats_source_save_as: str = "parquet"
+    hats_artifact_name: Optional[str] = None
+    hats_margin_threshold: Optional[float] = None
     col_for_filename: Optional[str] = None
     order_by: Optional[Any] = Field(default_factory=list)
     target_rows_per_part: Optional[int] = None
